@@ -14,12 +14,14 @@ contract DeployDestinationMinter is Script {
         (
             address router,
             ,
-            RandomizedNFT.ConstructorArguments memory args
+            RandomizedNFT.ConstructorArguments memory args,
+            ,
+            ,
+            ,
+
         ) = helperConfig.activeNetworkConfig();
 
         console.log("router: ", router);
-        console.log("fee address: ", args.feeAddress);
-        console.log("token address: ", args.tokenAddress);
 
         // after broadcast is real transaction, before just simulation
         vm.startBroadcast();

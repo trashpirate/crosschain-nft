@@ -11,7 +11,7 @@ contract DeploySourceMinter is Script {
 
     function run() external returns (SourceMinter, HelperConfig) {
         helperConfig = new HelperConfig();
-        (address router, uint64 chainSelector, ) = helperConfig
+        (address router, uint64 chainSelector, , , , , ) = helperConfig
             .activeNetworkConfig();
 
         console.log("router: ", router);

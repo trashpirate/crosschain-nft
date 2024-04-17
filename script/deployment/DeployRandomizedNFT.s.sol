@@ -10,11 +10,15 @@ contract DeployRandomizedNFT is Script {
 
     function run() external returns (RandomizedNFT, HelperConfig) {
         helperConfig = new HelperConfig();
-        (, , RandomizedNFT.ConstructorArguments memory args) = helperConfig
-            .activeNetworkConfig();
+        (
+            ,
+            ,
+            RandomizedNFT.ConstructorArguments memory args,
+            ,
+            ,
+            ,
 
-        console.log("fee address: ", args.feeAddress);
-        console.log("token address: ", args.tokenAddress);
+        ) = helperConfig.activeNetworkConfig();
 
         // after broadcast is real transaction, before just simulation
         vm.startBroadcast();

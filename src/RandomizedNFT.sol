@@ -4,24 +4,18 @@ pragma solidity ^0.8.20;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-
 import {ERC721A, IERC721A} from "@erc721a/contracts/ERC721A.sol";
 import {ERC721ABurnable} from "@erc721a/contracts/extensions/ERC721ABurnable.sol";
 
 /// @title RandomizedNFT
 /// @author Nadina Oates
-/// @notice Contract implementing ERC721A standard using the ERC20 token for minting
-contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
+/// @notice Contract implementing ERC721A standard using the ERC20 and native token for minting
+contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     /** Types */
     struct ConstructorArguments {
         string name;
         string symbol;
         string baseURI;
-        address tokenAddress;
-        address feeAddress;
-        uint256 tokenFee;
-        uint256 ethFee;
         uint256 maxPerWallet;
         uint256 batchLimit;
         uint256 maxSupply;
@@ -31,12 +25,8 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
      * Storage Variables
      */
     uint256 private immutable i_maxSupply;
-    IERC20 private immutable i_paymentToken;
 
     string private s_baseTokenURI;
-    address private s_feeAddress;
-    uint256 private s_tokenFee;
-    uint256 private s_ethFee;
     uint256 private s_maxPerWallet;
     uint256 private s_batchLimit;
 
@@ -46,9 +36,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
     /**
      * Events
      */
-    event TokenFeeSet(address indexed sender, uint256 fee);
-    event EthFeeSet(address indexed sender, uint256 fee);
-    event FeeAddressSet(address indexed sender, address feeAddress);
+
     event MaxPerWalletSet(address indexed sender, uint256 maxPerWallet);
     event BatchLimitSet(address indexed sender, uint256 batchLimit);
     event MetadataUpdate(uint256 indexed tokenId);
@@ -56,15 +44,11 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
     /**
      * Errors
      */
-    error RandomizedNFT_InsufficientTokenBalance();
+
     error RandomizedNFT_InsufficientMintQuantity();
     error RandomizedNFT_ExceedsMaxSupply();
     error RandomizedNFT_ExceedsMaxPerWallet();
     error RandomizedNFT_ExceedsBatchLimit();
-    error RandomizedNFT_FeeAddressIsZeroAddress();
-    error RandomizedNFT_TokenTransferFailed();
-    error RandomizedNFT_InsufficientEthFee(uint256 value, uint256 fee);
-    error RandomizedNFT_EthTransferFailed();
     error RandomizedNFT_MaxPerWalletExceedsMaxSupply();
     error RandomizedNFT_MaxPerWalletSmallerThanBatchLimit();
     error RandomizedNFT_BatchLimitExceedsMaxPerWallet();
@@ -81,15 +65,9 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
     constructor(
         ConstructorArguments memory args
     ) ERC721A(args.name, args.symbol) Ownable(msg.sender) {
-        if (args.feeAddress == address(0))
-            revert RandomizedNFT_FeeAddressIsZeroAddress();
         if (bytes(args.baseURI).length == 0) revert RandomizedNFT_NoBaseURI();
 
-        i_paymentToken = IERC20(args.tokenAddress);
         i_maxSupply = args.maxSupply;
-        s_feeAddress = args.feeAddress;
-        s_tokenFee = args.tokenFee;
-        s_ethFee = args.ethFee;
         s_maxPerWallet = args.maxPerWallet;
         s_batchLimit = args.batchLimit;
         s_ids = new uint256[](args.maxSupply);
@@ -101,62 +79,24 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
 
     /// @notice Mints NFT for a eth and a token fee
     /// @param quantity number of NFTs to mint
-    function mint(uint256 quantity) external payable nonReentrant {
+    function mint(address to, uint256 quantity) external {
         if (quantity == 0) revert RandomizedNFT_InsufficientMintQuantity();
-        if (balanceOf(msg.sender) + quantity > s_maxPerWallet) {
+        if (balanceOf(to) + quantity > s_maxPerWallet) {
             revert RandomizedNFT_ExceedsMaxPerWallet();
         }
+
         if (quantity > s_batchLimit) revert RandomizedNFT_ExceedsBatchLimit();
         if (_totalSupply() + quantity > i_maxSupply)
             revert RandomizedNFT_ExceedsMaxSupply();
 
-        if (i_paymentToken.balanceOf(msg.sender) < s_tokenFee * quantity)
-            revert RandomizedNFT_InsufficientTokenBalance();
-        if (msg.value < s_ethFee * quantity)
-            revert RandomizedNFT_InsufficientEthFee(msg.value, s_ethFee);
-
         uint256 tokenId = _nextTokenId();
         for (uint256 i = 0; i < quantity; i++) {
+            _setTokenURI(tokenId);
             unchecked {
-                _setTokenURI(tokenId);
                 tokenId++;
             }
         }
-        _safeMint(msg.sender, quantity);
-
-        (bool success, ) = payable(s_feeAddress).call{value: msg.value}("");
-        if (!success) revert RandomizedNFT_EthTransferFailed();
-
-        success = i_paymentToken.transferFrom(
-            msg.sender,
-            s_feeAddress,
-            s_tokenFee * quantity
-        );
-        if (!success) revert RandomizedNFT_TokenTransferFailed();
-    }
-
-    /// @notice Sets minting fee in terms of ERC20 tokens (only owner)
-    /// @param fee New fee in ERC20 tokens
-    function setTokenFee(uint256 fee) external onlyOwner {
-        s_tokenFee = fee;
-        emit TokenFeeSet(msg.sender, fee);
-    }
-
-    /// @notice Sets minting fee in ETH (only owner)
-    /// @param fee New fee in ETH
-    function setEthFee(uint256 fee) external onlyOwner {
-        s_ethFee = fee;
-        emit EthFeeSet(msg.sender, fee);
-    }
-
-    /// @notice Sets the receiver address for the token fee (only owner)
-    /// @param feeAddress New receiver address for tokens received through minting
-    function setFeeAddress(address feeAddress) external onlyOwner {
-        if (feeAddress == address(0)) {
-            revert RandomizedNFT_FeeAddressIsZeroAddress();
-        }
-        s_feeAddress = feeAddress;
-        emit FeeAddressSet(msg.sender, feeAddress);
+        _safeMint(to, quantity);
     }
 
     /// @notice Sets the maximum number of nfts per wallet (only owner)
@@ -183,46 +123,13 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable, ReentrancyGuard {
         emit BatchLimitSet(msg.sender, batchLimit);
     }
 
-    /// @notice Withdraw tokens from contract (only owner)
-    /// @param tokenAddress Contract address of token to be withdrawn
-    /// @param receiverAddress Tokens are withdrawn to this address
-    /// @return success of withdrawal
-    function withdrawTokens(
-        address tokenAddress,
-        address receiverAddress
-    ) external onlyOwner returns (bool success) {
-        IERC20 tokenContract = IERC20(tokenAddress);
-        uint256 amount = tokenContract.balanceOf(address(this));
-        success = tokenContract.transfer(receiverAddress, amount);
-    }
-
     /**
      * Getter Functions
      */
 
-    /// @notice Gets payment token address
-    function getPaymentToken() external view returns (address) {
-        return address(i_paymentToken);
-    }
-
     /// @notice Gets maximum supply
     function getMaxSupply() external view returns (uint256) {
         return i_maxSupply;
-    }
-
-    /// @notice Gets minting token fee in ERC20
-    function getTokenFee() external view returns (uint256) {
-        return s_tokenFee;
-    }
-
-    /// @notice Gets minting fee in ETH
-    function getEthFee() external view returns (uint256) {
-        return s_ethFee;
-    }
-
-    /// @notice Gets address that receives minting fees
-    function getFeeAddress() external view returns (address) {
-        return s_feeAddress;
     }
 
     /// @notice Gets number of nfts allowed minted at once

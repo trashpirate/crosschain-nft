@@ -55,10 +55,10 @@ contract HelperConfig is Script {
         // string name;
         // string symbol;
         // string baseUri;
-        // address tokenAddress;
-        // address feeAddress;
-        // uint256 tokenFee;
-        // uint256 ethFee;
+        address tokenAddress;
+        address feeAddress;
+        uint256 tokenFee;
+        uint256 ethFee;
         // uint256 maxPerWallet;
         // uint256 batchLimit;
         // uint256 maxSupply;
@@ -91,14 +91,14 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
-                    tokenAddress: TOKEN_ADDRESS_TEST,
-                    feeAddress: FEE_ADDRESS_TEST,
-                    tokenFee: TOKEN_FEE,
-                    ethFee: ETH_FEE,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
-                })
+                }),
+                tokenAddress: TOKEN_ADDRESS_TEST,
+                feeAddress: FEE_ADDRESS_TEST,
+                tokenFee: TOKEN_FEE,
+                ethFee: ETH_FEE
             });
     }
 
@@ -111,14 +111,14 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
-                    tokenAddress: TOKEN_ADDRESS_MAIN,
-                    feeAddress: FEE_ADDRESS_MAIN,
-                    tokenFee: TOKEN_FEE,
-                    ethFee: ETH_FEE,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
-                })
+                }),
+                tokenAddress: TOKEN_ADDRESS_MAIN,
+                feeAddress: FEE_ADDRESS_MAIN,
+                tokenFee: TOKEN_FEE,
+                ethFee: ETH_FEE
             });
     }
 
@@ -131,14 +131,14 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
-                    tokenAddress: TOKEN_ADDRESS_MAIN,
-                    feeAddress: FEE_ADDRESS_LOCAL,
-                    tokenFee: TOKEN_FEE,
-                    ethFee: ETH_FEE,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
-                })
+                }),
+                tokenAddress: TOKEN_ADDRESS_MAIN,
+                feeAddress: FEE_ADDRESS_LOCAL,
+                tokenFee: TOKEN_FEE,
+                ethFee: ETH_FEE
             });
     }
 
@@ -157,14 +157,14 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
-                    tokenAddress: address(token),
-                    feeAddress: FEE_ADDRESS_LOCAL,
-                    tokenFee: TOKEN_FEE,
-                    ethFee: ETH_FEE,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
-                })
+                }),
+                tokenAddress: address(token),
+                feeAddress: FEE_ADDRESS_LOCAL,
+                tokenFee: TOKEN_FEE,
+                ethFee: ETH_FEE
             });
     }
 }
