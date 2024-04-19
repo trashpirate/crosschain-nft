@@ -34,7 +34,8 @@ format :; forge fmt
 anvil :; anvil -m 'test test test test test test test test test test test junk' --steps-tracing --block-time 1
 
 # spin up fork
-fork :; @anvil --fork-url ${RPC_BSC} --fork-block-number 35267180 --fork-chain-id 56 --chain-id 123
+fork-bsc :; @anvil --fork-url ${RPC_BSC_MAIN} --fork-block-number 38005080 --fork-chain-id 56 --chain-id 123
+fork-base :; @anvil --fork-url ${RPC_BASE_MAIN} --fork-block-number 13383370 --fork-chain-id 8453 --chain-id 123
 
 # deployment
 deploy-testnet: 

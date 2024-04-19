@@ -11,15 +11,15 @@ contract DeploySourceMinter is Script {
 
     function run() external returns (SourceMinter, HelperConfig) {
         helperConfig = new HelperConfig();
-        (address router, uint64 chainSelector, , , , , ) = helperConfig
+        (SourceMinter.ConstructorArguments memory args, , ) = helperConfig
             .activeNetworkConfig();
 
-        console.log("router: ", router);
-        console.log("chainSelector: ", chainSelector);
+        console.log("router: ", args.router);
+        console.log("chainSelector: ", args.chainSelector);
 
         // after broadcast is real transaction, before just simulation
         vm.startBroadcast();
-        SourceMinter minter = new SourceMinter(router, chainSelector);
+        SourceMinter minter = new SourceMinter(args);
         vm.stopBroadcast();
         return (minter, helperConfig);
     }

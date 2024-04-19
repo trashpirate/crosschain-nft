@@ -12,13 +12,9 @@ contract DeployDestinationMinter is Script {
     function run() external returns (DestinationMinter, HelperConfig) {
         helperConfig = new HelperConfig();
         (
-            address router,
             ,
             RandomizedNFT.ConstructorArguments memory args,
-            ,
-            ,
-            ,
-
+            address router
         ) = helperConfig.activeNetworkConfig();
 
         console.log("router: ", router);

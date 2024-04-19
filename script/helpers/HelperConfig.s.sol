@@ -4,6 +4,8 @@ pragma solidity ^0.8.20;
 import {Script, console} from "forge-std/Script.sol";
 import {ERC20Token} from "../../src/ERC20Token.sol";
 import {RandomizedNFT} from "./../../src/RandomizedNFT.sol";
+import {SourceMinter} from "./../../src/SourceMinter.sol";
+import {DestinationMinter} from "./../../src/DestinationMinter.sol";
 import {MockCCIPRouter} from "@ccip/contracts/src/v0.8/ccip/test/mocks/MockRouter.sol";
 
 contract HelperConfig is Script {
@@ -11,8 +13,8 @@ contract HelperConfig is Script {
     uint256 public constant TOKEN_FEE = 1_000_000 ether;
     uint256 public constant ETH_FEE = 0.2 ether;
     uint256 public constant MAX_SUPPLY = 52;
-    uint256 public constant MAX_PER_WALLET = 5;
-    uint256 public constant BATCH_LIMIT = 0;
+    uint256 public constant MAX_PER_WALLET = 52;
+    uint256 public constant BATCH_LIMIT = 1;
 
     string public constant BASE_URI =
         "ipfs://bafybeia46ygme5csjbmqa73eacqcxmkfmmsajzkgvcxcr7a6tv2bl26nla/";
@@ -49,19 +51,9 @@ contract HelperConfig is Script {
     }
 
     struct NetworkConfig {
-        address router;
-        uint64 chainSelector;
-        RandomizedNFT.ConstructorArguments args;
-        // string name;
-        // string symbol;
-        // string baseUri;
-        address tokenAddress;
-        address feeAddress;
-        uint256 tokenFee;
-        uint256 ethFee;
-        // uint256 maxPerWallet;
-        // uint256 batchLimit;
-        // uint256 maxSupply;
+        SourceMinter.ConstructorArguments sourceArgs;
+        RandomizedNFT.ConstructorArguments nftArgs;
+        address destinationRouter;
     }
 
     constructor() {
@@ -85,9 +77,16 @@ contract HelperConfig is Script {
     function getTestnetConfig() public pure returns (NetworkConfig memory) {
         return
             NetworkConfig({
-                router: 0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93,
-                chainSelector: 10344971235874465080,
-                args: RandomizedNFT.ConstructorArguments({
+                sourceArgs: SourceMinter.ConstructorArguments({
+                    router: 0xE1053aE1857476f36A3C62580FF9b016E8EE8F6f,
+                    chainSelector: 10344971235874465080,
+                    tokenAddress: TOKEN_ADDRESS_TEST,
+                    feeAddress: FEE_ADDRESS_TEST,
+                    tokenFee: TOKEN_FEE,
+                    ethFee: ETH_FEE,
+                    maxSupply: MAX_SUPPLY
+                }),
+                nftArgs: RandomizedNFT.ConstructorArguments({
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
@@ -95,19 +94,23 @@ contract HelperConfig is Script {
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
                 }),
-                tokenAddress: TOKEN_ADDRESS_TEST,
-                feeAddress: FEE_ADDRESS_TEST,
-                tokenFee: TOKEN_FEE,
-                ethFee: ETH_FEE
+                destinationRouter: 0xD3b06cEbF099CE7DA4AcCf578aaebFDBd6e88a93
             });
     }
 
     function getMainnetConfig() public pure returns (NetworkConfig memory) {
         return
             NetworkConfig({
-                router: 0x881e3A65B4d4a04dD529061dd0071cf975F58bCD,
-                chainSelector: 15971525489660198786,
-                args: RandomizedNFT.ConstructorArguments({
+                sourceArgs: SourceMinter.ConstructorArguments({
+                    router: 0x34B03Cb9086d7D758AC55af71584F81A598759FE,
+                    chainSelector: 15971525489660198786,
+                    tokenAddress: TOKEN_ADDRESS_MAIN,
+                    feeAddress: FEE_ADDRESS_MAIN,
+                    tokenFee: TOKEN_FEE,
+                    ethFee: ETH_FEE,
+                    maxSupply: MAX_SUPPLY
+                }),
+                nftArgs: RandomizedNFT.ConstructorArguments({
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
@@ -115,19 +118,23 @@ contract HelperConfig is Script {
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
                 }),
-                tokenAddress: TOKEN_ADDRESS_MAIN,
-                feeAddress: FEE_ADDRESS_MAIN,
-                tokenFee: TOKEN_FEE,
-                ethFee: ETH_FEE
+                destinationRouter: 0x881e3A65B4d4a04dD529061dd0071cf975F58bCD
             });
     }
 
     function getLocalForkConfig() public pure returns (NetworkConfig memory) {
         return
             NetworkConfig({
-                router: 0x881e3A65B4d4a04dD529061dd0071cf975F58bCD,
-                chainSelector: 15971525489660198786,
-                args: RandomizedNFT.ConstructorArguments({
+                sourceArgs: SourceMinter.ConstructorArguments({
+                    router: 0x34B03Cb9086d7D758AC55af71584F81A598759FE,
+                    chainSelector: 15971525489660198786,
+                    tokenAddress: TOKEN_ADDRESS_MAIN,
+                    feeAddress: FEE_ADDRESS_LOCAL,
+                    tokenFee: TOKEN_FEE,
+                    ethFee: ETH_FEE,
+                    maxSupply: MAX_SUPPLY
+                }),
+                nftArgs: RandomizedNFT.ConstructorArguments({
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
@@ -135,10 +142,7 @@ contract HelperConfig is Script {
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
                 }),
-                tokenAddress: TOKEN_ADDRESS_MAIN,
-                feeAddress: FEE_ADDRESS_LOCAL,
-                tokenFee: TOKEN_FEE,
-                ethFee: ETH_FEE
+                destinationRouter: 0x881e3A65B4d4a04dD529061dd0071cf975F58bCD
             });
     }
 
@@ -146,14 +150,22 @@ contract HelperConfig is Script {
         // Deploy mock contracts
         vm.startBroadcast();
         ERC20Token token = new ERC20Token(TOKENOWNER);
-        MockCCIPRouter router = new MockCCIPRouter();
+        MockCCIPRouter sourceRouter = new MockCCIPRouter();
+        MockCCIPRouter destinationRouter = new MockCCIPRouter();
         vm.stopBroadcast();
 
         return
             NetworkConfig({
-                router: address(router),
-                chainSelector: 15971525489660198786,
-                args: RandomizedNFT.ConstructorArguments({
+                sourceArgs: SourceMinter.ConstructorArguments({
+                    router: address(sourceRouter),
+                    chainSelector: 10344971235874465080,
+                    tokenAddress: address(token),
+                    feeAddress: FEE_ADDRESS_LOCAL,
+                    tokenFee: TOKEN_FEE,
+                    ethFee: ETH_FEE,
+                    maxSupply: MAX_SUPPLY
+                }),
+                nftArgs: RandomizedNFT.ConstructorArguments({
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
@@ -161,10 +173,7 @@ contract HelperConfig is Script {
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
                 }),
-                tokenAddress: address(token),
-                feeAddress: FEE_ADDRESS_LOCAL,
-                tokenFee: TOKEN_FEE,
-                ethFee: ETH_FEE
+                destinationRouter: address(destinationRouter)
             });
     }
 }

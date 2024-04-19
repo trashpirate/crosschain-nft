@@ -44,7 +44,6 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     /**
      * Errors
      */
-
     error RandomizedNFT_InsufficientMintQuantity();
     error RandomizedNFT_ExceedsMaxSupply();
     error RandomizedNFT_ExceedsMaxPerWallet();
@@ -75,8 +74,6 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         _setBaseURI(args.baseURI);
     }
 
-    receive() external payable {}
-
     /// @notice Mints NFT for a eth and a token fee
     /// @param quantity number of NFTs to mint
     function mint(address to, uint256 quantity) external {
@@ -84,7 +81,6 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         if (balanceOf(to) + quantity > s_maxPerWallet) {
             revert RandomizedNFT_ExceedsMaxPerWallet();
         }
-
         if (quantity > s_batchLimit) revert RandomizedNFT_ExceedsBatchLimit();
         if (_totalSupply() + quantity > i_maxSupply)
             revert RandomizedNFT_ExceedsMaxSupply();
@@ -190,9 +186,9 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         ownerOf(tokenId);
     }
 
-    /// @notice returns total supply
-    function _totalSupply() private view returns (uint256) {
-        return _nextTokenId();
+    /// @notice Retrieves base uri
+    function _baseURI() internal view override returns (string memory) {
+        return s_baseTokenURI;
     }
 
     /// @notice Sets base uri
@@ -201,14 +197,14 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         s_baseTokenURI = baseURI;
     }
 
-    /// @notice Retrieves base uri
-    function _baseURI() internal view override returns (string memory) {
-        return s_baseTokenURI;
+    /// @notice returns total supply
+    function _totalSupply() private view returns (uint256) {
+        return _nextTokenId();
     }
 
     /// @notice Checks if token owner exists
     /// @dev adapted code from openzeppelin ERC721URIStorage
-    function _setTokenURI(uint256 tokenId) internal virtual {
+    function _setTokenURI(uint256 tokenId) private {
         s_tokenURIs[tokenId] = _randomTokenURI();
         emit MetadataUpdate(tokenId);
     }

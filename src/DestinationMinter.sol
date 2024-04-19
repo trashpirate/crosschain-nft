@@ -19,6 +19,10 @@ contract DestinationMinter is CCIPReceiver {
         nft = new RandomizedNFT(args);
     }
 
+    function getNftContractAddress() external view returns (address) {
+        return address(nft);
+    }
+
     function _ccipReceive(
         Client.Any2EVMMessage memory message
     ) internal override {
