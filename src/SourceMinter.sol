@@ -24,7 +24,6 @@ contract SourceMinter is Ownable {
     uint64 immutable i_chainSelector;
 
     IERC20 immutable i_paymentToken;
-    uint256 immutable i_maxSupply;
 
     address s_feeAddress;
     uint256 s_tokenFee;
@@ -63,8 +62,6 @@ contract SourceMinter is Ownable {
         s_feeAddress = args.feeAddress;
         s_tokenFee = args.tokenFee;
         s_ethFee = args.ethFee;
-
-        i_maxSupply = args.maxSupply;
 
         s_paused = true;
     }
@@ -181,11 +178,6 @@ contract SourceMinter is Ownable {
     /// @notice Gets address that receives minting fees
     function getFeeAddress() external view returns (address) {
         return s_feeAddress;
-    }
-
-    /// @notice Gets maximum supply
-    function getMaxSupply() external view returns (uint256) {
-        return i_maxSupply;
     }
 
     /// @notice Gets whether contract is paused

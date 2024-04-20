@@ -76,7 +76,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
 
     /// @notice Mints NFT for a eth and a token fee
     /// @param quantity number of NFTs to mint
-    function mint(address to, uint256 quantity) external {
+    function mint(address to, uint256 quantity) external onlyOwner {
         if (quantity == 0) revert RandomizedNFT_InsufficientMintQuantity();
         if (balanceOf(to) + quantity > s_maxPerWallet) {
             revert RandomizedNFT_ExceedsMaxPerWallet();
@@ -92,7 +92,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
                 tokenId++;
             }
         }
-        _safeMint(to, quantity);
+        _mint(to, quantity);
     }
 
     /// @notice Sets the maximum number of nfts per wallet (only owner)
@@ -216,15 +216,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
 
         unchecked {
             randIdx =
-                uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            block.prevrandao,
-                            msg.sender,
-                            block.timestamp
-                        )
-                    )
-                ) %
+                uint256(keccak256(abi.encodePacked(block.prevrandao))) %
                 numAvailableURIs;
         }
 

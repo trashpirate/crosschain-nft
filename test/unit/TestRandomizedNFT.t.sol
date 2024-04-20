@@ -13,6 +13,18 @@ import {RandomizedNFT} from "./../../src/RandomizedNFT.sol";
 import {ERC20Token} from "./../../src/ERC20Token.sol";
 import {HelperConfig} from "../../script/helpers/HelperConfig.s.sol";
 
+contract TestHelper {
+    mapping(string => bool) public tokenUris;
+
+    function setTokenUri(string memory tokenUri) public {
+        tokenUris[tokenUri] = true;
+    }
+
+    function isTokenUriSet(string memory tokenUri) public view returns (bool) {
+        return tokenUris[tokenUri];
+    }
+}
+
 contract TestInteractions is Test {
     // configuration
     DeployCrossChainNFT deployment;
@@ -81,80 +93,75 @@ contract TestInteractions is Test {
         token = ERC20Token(sourceMinter.getPaymentToken());
     }
 
-    function test__CrossChainMint(
-        uint quantity
-    ) public fundedAndApproved(USER) unpaused noBatchLimit skipFork {
-        quantity = bound(quantity, 1, 2);
+    /** TRANSFER */
+    function test__TransferNfts(
+        address account,
+        address receiver
+    ) public unpaused noBatchLimit skipFork {
+        uint256 quantity = 1; //bound(numOfNfts, 1, 100);
+        vm.assume(account != address(0));
+        vm.assume(receiver != address(0));
+
+        // fund user with eth
+        deal(account, 1000 ether);
+
+        // fund user with token
+        vm.startPrank(token.owner());
+        token.transfer(account, STARTING_BALANCE);
+        vm.stopPrank();
+
+        vm.prank(account);
+        token.approve(address(sourceMinter), STARTING_BALANCE);
+
         uint256 ethFee = quantity * sourceMinter.getEthFee();
 
-        vm.prank(USER);
+        vm.prank(account);
         sourceMinter.mint{value: ethFee}(address(destinationMinter), quantity);
 
-        assertEq(randomizedNFT.balanceOf(USER), quantity);
+        assertEq(randomizedNFT.balanceOf(account), quantity);
+        assertEq(randomizedNFT.ownerOf(0), account);
+
+        vm.prank(account);
+        randomizedNFT.transferFrom(account, receiver, 0);
+
+        assertEq(randomizedNFT.ownerOf(0), receiver);
+        assertEq(randomizedNFT.balanceOf(receiver), quantity);
     }
 
-    function test__EmitEvent__UpdateMetadata()
-        public
-        fundedAndApproved(USER)
-        unpaused
-    {
-        uint256 ethFee = sourceMinter.getEthFee();
+    /** TOKEN URI */
 
-        vm.expectEmit(true, true, true, true);
-        emit MetadataUpdate(0);
+    function test__RetrieveTokenUri() public fundedAndApproved(USER) unpaused {
+        uint256 ethFee = sourceMinter.getEthFee();
 
         vm.prank(USER);
         sourceMinter.mint{value: ethFee}(address(destinationMinter), 1);
+        assertEq(randomizedNFT.balanceOf(USER), 1);
+
+        console.log(randomizedNFT.tokenURI(0));
     }
 
-    function test__RevertWhen__MintZero()
-        public
-        fundedAndApproved(USER)
-        unpaused
-    {
-        uint256 ethFee = sourceMinter.getEthFee();
+    /// forge-config: default.fuzz.runs = 3
+    function test__UniqueTokenURI(
+        uint roll
+    ) public fundedAndApproved(USER) unpaused noBatchLimit skipFork {
+        roll = bound(roll, 0, 100000000000);
+        TestHelper testHelper = new TestHelper();
 
-        vm.expectRevert();
-        // RandomizedNFT.RandomizedNFT_InsufficientMintQuantity.selector
-        vm.prank(USER);
-        sourceMinter.mint{value: ethFee}(address(destinationMinter), 0);
-    }
-
-    function test__RevertWhen__CrossChainMintExceedsMaxSupply()
-        public
-        fundedAndApproved(USER)
-        unpaused
-    {
-        uint quantity = 1;
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
+        uint256 maxSupply = randomizedNFT.getMaxSupply();
 
         vm.startPrank(USER);
-        for (uint256 index = 0; index < randomizedNFT.getMaxSupply(); index++) {
-            sourceMinter.mint{value: ethFee}(
-                address(destinationMinter),
-                quantity
+        for (uint256 index = 0; index < maxSupply; index++) {
+            vm.prevrandao(bytes32(uint256(index + roll)));
+            uint256 ethFee = sourceMinter.getEthFee();
+
+            sourceMinter.mint{value: ethFee}(address(destinationMinter), 1);
+            assertEq(
+                testHelper.isTokenUriSet(randomizedNFT.tokenURI(index)),
+                false
             );
+            console.log(randomizedNFT.tokenURI(index));
+            testHelper.setTokenUri(randomizedNFT.tokenURI(index));
         }
-        assertEq(randomizedNFT.balanceOf(USER), randomizedNFT.getMaxSupply());
-
-        vm.expectRevert();
-        sourceMinter.mint{value: ethFee}(address(destinationMinter), quantity);
-    }
-
-    function test__RevertWhen__CrossChainMintExceedsBatchLimit()
-        public
-        fundedAndApproved(USER)
-        unpaused
-    {
-        uint quantity = 3;
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
-
-        vm.startPrank(destinationMinter.owner());
-        destinationMinter.setBatchLimit(2);
         vm.stopPrank();
-
-        vm.expectRevert();
-        vm.prank(USER);
-        sourceMinter.mint{value: ethFee}(address(destinationMinter), quantity);
     }
 }

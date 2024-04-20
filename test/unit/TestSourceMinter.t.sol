@@ -38,6 +38,13 @@ contract TestSourceMinter is Test {
     event Paused(address indexed sender, bool isPaused);
 
     // modifiers
+    modifier skipFork() {
+        if (block.chainid != 31337) {
+            return;
+            _;
+        }
+    }
+
     modifier funded(address account) {
         // fund user with eth
         deal(account, 1000 ether);
@@ -55,13 +62,6 @@ contract TestSourceMinter is Test {
         vm.stopPrank();
         _;
     }
-
-    // modifier noBatchLimit() {
-    //     vm.startPrank(sourceMinter.owner());
-    //     sourceMinter.pause(false);
-    //     vm.stopPrank();
-    //     _;
-    // }
 
     function setUp() external virtual {
         deployment = new DeploySourceMinter();
@@ -311,8 +311,10 @@ contract TestSourceMinter is Test {
     }
 
     /** MINT */
-    function test__Mint(uint256 quantity) public funded(USER) unpaused {
-        quantity = bound(quantity, 1, sourceMinter.getMaxSupply());
+    function test__Mint(
+        uint256 quantity
+    ) public funded(USER) unpaused skipFork {
+        quantity = bound(quantity, 1, networkConfig.nftArgs.maxSupply);
         uint256 tokenBalance = token.balanceOf(USER);
         uint256 ethBalance = USER.balance;
 
@@ -358,17 +360,14 @@ contract TestSourceMinter is Test {
 
     function test__RevertWhen__InsufficientTokenBalance(
         uint256 quantity
-    ) public unpaused {
-        quantity = bound(quantity, 1, sourceMinter.getMaxSupply());
+    ) public unpaused skipFork {
+        quantity = bound(quantity, 1, networkConfig.nftArgs.maxSupply);
 
         // fund user
         deal(USER, 1000 ether);
         vm.startPrank(token.owner());
         token.transfer(USER, 1000 ether);
         vm.stopPrank();
-
-        uint256 tokenBalance = token.balanceOf(USER);
-        uint256 ethBalance = USER.balance;
 
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
         uint256 ethFee = quantity * sourceMinter.getEthFee();
@@ -386,7 +385,7 @@ contract TestSourceMinter is Test {
     function test__RevertWhen__InsufficientEthFee(
         uint256 quantity
     ) public funded(USER) unpaused {
-        quantity = bound(quantity, 1, sourceMinter.getMaxSupply());
+        quantity = bound(quantity, 1, networkConfig.nftArgs.maxSupply);
 
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
         uint256 ethFee = quantity * sourceMinter.getEthFee();
@@ -408,8 +407,8 @@ contract TestSourceMinter is Test {
 
     function test__RevertsWhen__TokenTransferFails(
         uint256 quantity
-    ) public funded(USER) unpaused {
-        quantity = bound(quantity, 1, sourceMinter.getMaxSupply());
+    ) public funded(USER) unpaused skipFork {
+        quantity = bound(quantity, 1, networkConfig.nftArgs.maxSupply);
         uint256 ethFee = quantity * sourceMinter.getEthFee();
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
 

@@ -38,9 +38,11 @@ fork-bsc :; @anvil --fork-url ${RPC_BSC_MAIN} --fork-block-number 38005080 --for
 fork-base :; @anvil --fork-url ${RPC_BASE_MAIN} --fork-block-number 13383370 --fork-chain-id 8453 --chain-id 123
 
 # deployment
-deploy-testnet: 
-	@forge script script/deployment/DeployTurboTails.s.sol:DeployTurboTails --rpc-url $(RPC_BSC_TEST) --account Testing --sender 0x7Bb8be3D9015682d7AC0Ea377dC0c92B0ba152eF --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
-	
+deploy-source-testnet: 
+	@forge script script/deployment/DeploySourceMinter.s.sol:DeploySourceMinter --rpc-url $(RPC_BSC_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
+deploy-destination-testnet: 
+	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url $(RPC_BASE_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BASESCAN_SEPOLIA_KEY)
+
 # security
 slither :; slither ./src 
 
