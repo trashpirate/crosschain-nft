@@ -7,10 +7,8 @@ import {HelperConfig} from "../helpers/HelperConfig.s.sol";
 
 contract DeployERC20Token is Script {
     function run() external returns (ERC20Token) {
-        HelperConfig helperConfig = new HelperConfig();
-
         vm.startBroadcast();
-        ERC20Token token = new ERC20Token(helperConfig.TOKENOWNER());
+        ERC20Token token = new ERC20Token();
         vm.stopBroadcast();
         return token;
     }

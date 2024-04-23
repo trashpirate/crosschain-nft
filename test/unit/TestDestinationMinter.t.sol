@@ -29,6 +29,7 @@ contract TestDestinationMinter is Test {
     // events
     event MaxPerWalletSet(address indexed sender, uint256 maxPerWallet);
     event BatchLimitSet(address indexed sender, uint256 batchLimit);
+    event BaseUriSet(string indexed baseUri);
 
     function setUp() external virtual {
         deployment = new DeployDestinationMinter();
@@ -37,6 +38,51 @@ contract TestDestinationMinter is Test {
         networkConfig = helperConfig.getActiveNetworkConfigStruct();
 
         nfts = RandomizedNFT(destinationMinter.getNftContractAddress());
+    }
+
+    /** DEPLOYMENT */
+
+    function test__DestinationContractInitialization() public view {
+        assertEq(destinationMinter.getNftContractAddress(), address(nfts));
+        assertEq(
+            destinationMinter.getRouterAddress(),
+            networkConfig.destinationRouter
+        );
+    }
+
+    /** SET BASE  URI */
+    function test__SetBaseUri() public {
+        address owner = destinationMinter.owner();
+        string memory baseURI = "new uri";
+
+        vm.prank(owner);
+        destinationMinter.setBaseUri(baseURI);
+
+        assertEq(nfts.getBaseUri(), baseURI);
+    }
+
+    function test__EmitEvent__SetBaseUri() public {
+        string memory baseURI = "new uri";
+        address owner = destinationMinter.owner();
+
+        vm.expectEmit(true, true, true, true);
+        emit BaseUriSet(baseURI);
+
+        vm.prank(owner);
+        destinationMinter.setBaseUri(baseURI);
+    }
+
+    function test__RevertWhen__NotOwnerSetsBaseUri() public {
+        string memory baseURI = "new uri";
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                USER
+            )
+        );
+
+        vm.prank(USER);
+        destinationMinter.setBaseUri(baseURI);
     }
 
     /** SET MAX PER WALLET */

@@ -39,6 +39,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
 
     event MaxPerWalletSet(address indexed sender, uint256 maxPerWallet);
     event BatchLimitSet(address indexed sender, uint256 batchLimit);
+    event BaseUriSet(string indexed baseUri);
     event MetadataUpdate(uint256 indexed tokenId);
 
     /**
@@ -57,9 +58,13 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     error RandomizedNFT_NoBaseURI();
 
     /// @notice Constructor
-    // / @param initialOwner ownerhip is transfered to this address after creation
-    // / @param feeAddress address to receive minting fees
-    // / @param baseURI base uri for NFT metadata
+    /// @param args constructor arguments:
+    ///                     name: collection name
+    ///                     symbol: nft symbol
+    ///                     baseUri: base uri of collection
+    ///                     maxSupply: maximum nfts mintable
+    ///                     maxPerWallet: how many nfts can be minted per wallet
+    ///                     batchLimit: how many nfts can be minted at once
     /// @dev inherits from ERC721A
     constructor(
         ConstructorArguments memory args
@@ -75,6 +80,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     }
 
     /// @notice Mints NFT for a eth and a token fee
+    /// @param to address NFTs are minted to
     /// @param quantity number of NFTs to mint
     function mint(address to, uint256 quantity) external onlyOwner {
         if (quantity == 0) revert RandomizedNFT_InsufficientMintQuantity();
@@ -93,6 +99,12 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
             }
         }
         _mint(to, quantity);
+    }
+
+    /// @notice Sets base Uri
+    /// @param baseURI Maximum number of nfts that can be held by one account
+    function setBaseUri(string memory baseURI) external onlyOwner {
+        _setBaseURI(baseURI);
     }
 
     /// @notice Sets the maximum number of nfts per wallet (only owner)
@@ -195,6 +207,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     /// @param baseURI base uri for NFT metadata
     function _setBaseURI(string memory baseURI) private {
         s_baseTokenURI = baseURI;
+        emit BaseUriSet(baseURI);
     }
 
     /// @notice returns total supply
@@ -209,16 +222,10 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         emit MetadataUpdate(tokenId);
     }
 
-    /// @notice generates a random tokenUR
+    /// @notice generates a random tokenURI
     function _randomTokenURI() private returns (uint256 randomTokenURI) {
         uint256 numAvailableURIs = s_ids.length;
-        uint256 randIdx;
-
-        unchecked {
-            randIdx =
-                uint256(keccak256(abi.encodePacked(block.prevrandao))) %
-                numAvailableURIs;
-        }
+        uint256 randIdx = block.prevrandao % numAvailableURIs;
 
         // get new and nonexisting random id
         randomTokenURI = (s_ids[randIdx] != 0) ? s_ids[randIdx] : randIdx;

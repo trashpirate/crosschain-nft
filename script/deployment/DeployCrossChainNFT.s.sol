@@ -22,8 +22,8 @@ contract DeployCrossChainNFT is Script {
         ) = helperConfig.activeNetworkConfig();
 
         console.log("source router: ", args.router);
-        console.log("chainSelector: ", args.chainSelector);
-        console.log("desination rouer: ", destinationRouter);
+        console.log("chain selector: ", args.chainSelector);
+        console.log("destination router: ", destinationRouter);
 
         // after broadcast is real transaction, before just simulation
         vm.startBroadcast();

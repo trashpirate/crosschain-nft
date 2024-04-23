@@ -6,18 +6,35 @@ import {Client} from "@ccip/contracts/src/v0.8/ccip/libraries/Client.sol";
 import {CCIPReceiver} from "@ccip/contracts/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title DestinationMinter
+/// @author Nadina Oates
+/// @notice Destination minter as part of cross-chain NFT contract using CCIP
 contract DestinationMinter is CCIPReceiver, Ownable {
     /** Storage Variables */
-    RandomizedNFT nft;
+    RandomizedNFT private immutable nft;
 
     /** Events */
     event DestinationMinter_MintCallSuccessfull();
 
+    /** Errors */
+    error DestinationMinter_MintFailed();
+
+    /// @notice Contructor
+    /// @param router address of CCIP router on target chain
+    /// @param args struct containing the constructor arguments for the NFT contract
+    /// @dev inherits from CCIPReceiver (Chainlink) and Ownable (OpenZeppelin), code was adapted from Chainlink's cross-chain nft example
     constructor(
         address router,
         RandomizedNFT.ConstructorArguments memory args
     ) CCIPReceiver(router) Ownable(msg.sender) {
+        // deploy NFT contract
         nft = new RandomizedNFT(args);
+    }
+
+    /// @notice Sets new base uri
+    /// @param baseURI base uri for metadata
+    function setBaseUri(string memory baseURI) external onlyOwner {
+        nft.setBaseUri(baseURI);
     }
 
     /// @notice Sets the maximum number of nfts per wallet in NFT contract
@@ -37,13 +54,18 @@ contract DestinationMinter is CCIPReceiver, Ownable {
         return address(nft);
     }
 
+    /// @notice Gets CCIP router address
+    function getRouterAddress() external view returns (address) {
+        return address(i_ccipRouter);
+    }
+
     /// @notice Override of CCIP Receiver to receive messages from CCIP router
     /// @param message from CCIP Router
     function _ccipReceive(
         Client.Any2EVMMessage memory message
     ) internal override {
         (bool success, ) = address(nft).call(message.data);
-        require(success);
+        if (!success) revert DestinationMinter_MintFailed();
         emit DestinationMinter_MintCallSuccessfull();
     }
 }

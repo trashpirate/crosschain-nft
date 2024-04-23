@@ -24,6 +24,10 @@ build:; forge build
 # test
 test :; forge test 
 
+# test coverage
+coverage:; @forge coverage --contracts src
+coverage-w:; @forge coverage --contracts src --report debug > coverage.txt
+
 # take snapshot
 snapshot :; forge snapshot
 
@@ -38,10 +42,17 @@ fork-bsc :; @anvil --fork-url ${RPC_BSC_MAIN} --fork-block-number 38005080 --for
 fork-base :; @anvil --fork-url ${RPC_BASE_MAIN} --fork-block-number 13383370 --fork-chain-id 8453 --chain-id 123
 
 # deployment
+deploy-local: 
+	@forge script script/deployment/DeployCrossChainNFT.s.sol:DeployCrossChainNFT --rpc-url localhost --private-key ${DEFAULT_ANVIL_KEY} --broadcast 
+deploy-destination-local: 
+	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url localhost --private-key ${DEFAULT_ANVIL_KEY} --broadcast
+
+deploy-token-testnet: 
+	@forge script script/deployment/DeployERC20Token.s.sol:DeployERC20Token --rpc-url $(RPC_BSC_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
 deploy-source-testnet: 
 	@forge script script/deployment/DeploySourceMinter.s.sol:DeploySourceMinter --rpc-url $(RPC_BSC_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
 deploy-destination-testnet: 
-	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url $(RPC_BASE_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BASESCAN_SEPOLIA_KEY)
+	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url $(RPC_BASE_SEPOLIA) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BASESCAN_SEPOLIA_KEY) -vvvv
 
 # security
 slither :; slither ./src 

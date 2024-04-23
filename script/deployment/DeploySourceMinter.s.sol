@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 import {Script, console} from "forge-std/Script.sol";
 import {SourceMinter} from "./../../src/SourceMinter.sol";
 import {HelperConfig} from "../helpers/HelperConfig.s.sol";
-import {RandomizedNFT} from "./../../src/RandomizedNFT.sol";
 
 contract DeploySourceMinter is Script {
     HelperConfig public helperConfig;

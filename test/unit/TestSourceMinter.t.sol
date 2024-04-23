@@ -6,6 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+
 import {SourceMinter} from "./../../src/SourceMinter.sol";
 import {DeploySourceMinter} from "./../../script/deployment/DeploySourceMinter.s.sol";
 import {ERC20Token} from "./../../src/ERC20Token.sol";
@@ -74,15 +75,23 @@ contract TestSourceMinter is Test {
     }
 
     /** INITIALIZATION */
-    function test__Initialization() public view {
+    function test__SourceMinterInitialization() public view {
         ERC20 paymentToken = ERC20(sourceMinter.getPaymentToken());
         string memory feeTokenSymbol = paymentToken.symbol();
         assertEq(feeTokenSymbol, "TEST");
         assertEq(sourceMinter.isPaused(), true);
+        assertEq(
+            sourceMinter.getRouterAddress(),
+            networkConfig.sourceArgs.router
+        );
+        assertEq(
+            sourceMinter.getChainSelector(),
+            networkConfig.sourceArgs.chainSelector
+        );
     }
 
     /** CONSTRUCTOR ARGUMENTS */
-    function test__ConstructorArguments() public view {
+    function test__SourceMinterConstructorArguments() public view {
         assertEq(
             sourceMinter.getPaymentToken(),
             networkConfig.sourceArgs.tokenAddress

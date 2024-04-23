@@ -1,66 +1,12 @@
-## Foundry
+# testnet
+Payment Token:
+https://testnet.bscscan.com/address/0x563f5a7fa101dd7051853604ec63103ab6226c7b
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+Source Minter:
+https://testnet.bscscan.com/address/0x73aedce9a51e3c92a62806a9c34092eedd46af7a
 
-Foundry consists of:
+Destination Minter:
+https://base-sepolia.blockscout.com/address/0x563F5a7fa101dD7051853604ec63103Ab6226c7b
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+NFT Contract:
+https://base-sepolia.blockscout.com/address/0x8b275F195Eaa5eE618b5b36Ea23630Be31085CFc

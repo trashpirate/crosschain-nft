@@ -17,7 +17,7 @@ contract HelperConfig is Script {
     uint256 public constant BATCH_LIMIT = 1;
 
     string public constant BASE_URI =
-        "ipfs://bafybeia46ygme5csjbmqa73eacqcxmkfmmsajzkgvcxcr7a6tv2bl26nla/";
+        "ipfs://QmX9WMzYYvLj8LuhAWwTEebWjERB5N56Av91wtJGvJ1aim/";
 
     /** MAINNET - UDPATE BEFORE DEPLOYMENT !!! */
     string public constant NAME = "Queens";
@@ -31,7 +31,7 @@ contract HelperConfig is Script {
     address public constant FEE_ADDRESS_TEST =
         0x7Bb8be3D9015682d7AC0Ea377dC0c92B0ba152eF;
     address public constant TOKEN_ADDRESS_TEST =
-        0x70997970C51812dc3A010C7d01b50e0d17dc79C8;
+        0x563F5a7fa101dD7051853604ec63103Ab6226c7b;
 
     /** LOCAL */
     address public constant FEE_ADDRESS_LOCAL =
@@ -149,7 +149,7 @@ contract HelperConfig is Script {
     function getAnvilConfig() public returns (NetworkConfig memory) {
         // Deploy mock contracts
         vm.startBroadcast();
-        ERC20Token token = new ERC20Token(TOKENOWNER);
+        ERC20Token token = new ERC20Token();
         MockCCIPRouter sourceRouter = new MockCCIPRouter();
         MockCCIPRouter destinationRouter = new MockCCIPRouter();
         vm.stopBroadcast();
