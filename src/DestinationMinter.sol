@@ -32,9 +32,15 @@ contract DestinationMinter is CCIPReceiver, Ownable {
     }
 
     /// @notice Sets new base uri
+    /// @param contractURI base uri for metadata
+    function setContractURI(string memory contractURI) external onlyOwner {
+        nft.setContractURI(contractURI);
+    }
+    
+    /// @notice Sets new base uri
     /// @param baseURI base uri for metadata
-    function setBaseUri(string memory baseURI) external onlyOwner {
-        nft.setBaseUri(baseURI);
+    function setBaseURI(string memory baseURI) external onlyOwner {
+        nft.setBaseURI(baseURI);
     }
 
     /// @notice Sets the maximum number of nfts per wallet in NFT contract

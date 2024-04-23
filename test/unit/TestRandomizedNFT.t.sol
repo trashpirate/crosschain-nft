@@ -40,6 +40,7 @@ contract TestInteractions is Test {
     // helpers
     address USER = makeAddr("user");
     uint256 constant STARTING_BALANCE = 100_000_000 * 10 ** 18;
+    uint256 constant CCIP_FEE = 0.00001 ether;
 
     // events
     event MetadataUpdate(uint256 indexed tokenId);
@@ -93,6 +94,27 @@ contract TestInteractions is Test {
         token = ERC20Token(sourceMinter.getPaymentToken());
     }
 
+    /** INITIALIZATION */
+    function test__RandomizedNFTInitialization() public {
+        assertEq(randomizedNFT.name(), "Randomized NFT");
+        assertEq(randomizedNFT.symbol(), "RANDNFT");
+        assertEq(randomizedNFT.getMaxSupply(), networkConfig.nftArgs.maxSupply);
+        assertEq(
+            randomizedNFT.getBatchLimit(),
+            networkConfig.nftArgs.batchLimit
+        );
+        assertEq(
+            randomizedNFT.getMaxPerWallet(),
+            networkConfig.nftArgs.maxPerWallet
+        );
+        assertEq(
+            randomizedNFT.contractURI(),
+            networkConfig.nftArgs.contractURI
+        );
+        assertEq(randomizedNFT.getBaseURI(), networkConfig.nftArgs.baseURI);
+        assertEq(randomizedNFT.supportsInterface(0x80ac58cd), true);
+    }
+
     /** TRANSFER */
     function test__TransferNfts(
         address account,
@@ -113,7 +135,7 @@ contract TestInteractions is Test {
         vm.prank(account);
         token.approve(address(sourceMinter), STARTING_BALANCE);
 
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
+        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
 
         vm.prank(account);
         sourceMinter.mint{value: ethFee}(address(destinationMinter), quantity);
@@ -131,7 +153,7 @@ contract TestInteractions is Test {
     /** TOKEN URI */
 
     function test__RetrieveTokenUri() public fundedAndApproved(USER) unpaused {
-        uint256 ethFee = sourceMinter.getEthFee();
+        uint256 ethFee = sourceMinter.getEthFee() + CCIP_FEE;
 
         vm.prank(USER);
         sourceMinter.mint{value: ethFee}(address(destinationMinter), 1);
@@ -152,7 +174,7 @@ contract TestInteractions is Test {
         vm.startPrank(USER);
         for (uint256 index = 0; index < maxSupply; index++) {
             vm.prevrandao(bytes32(uint256(index + roll)));
-            uint256 ethFee = sourceMinter.getEthFee();
+            uint256 ethFee = sourceMinter.getEthFee() + CCIP_FEE;
 
             sourceMinter.mint{value: ethFee}(address(destinationMinter), 1);
             assertEq(

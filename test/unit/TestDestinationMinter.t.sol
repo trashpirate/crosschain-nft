@@ -29,7 +29,8 @@ contract TestDestinationMinter is Test {
     // events
     event MaxPerWalletSet(address indexed sender, uint256 maxPerWallet);
     event BatchLimitSet(address indexed sender, uint256 batchLimit);
-    event BaseUriSet(string indexed baseUri);
+    event BaseURIUpdated(string indexed baseUri);
+    event ContractURIUpdated(string indexed contractUri);
 
     function setUp() external virtual {
         deployment = new DeployDestinationMinter();
@@ -43,7 +44,10 @@ contract TestDestinationMinter is Test {
     /** DEPLOYMENT */
 
     function test__DestinationContractInitialization() public view {
-        assertEq(destinationMinter.getNftContractAddress(), address(nfts));
+        RandomizedNFT nftContract = RandomizedNFT(
+            destinationMinter.getNftContractAddress()
+        );
+        assertEq(nftContract.supportsInterface(0x80ac58cd), true);
         assertEq(
             destinationMinter.getRouterAddress(),
             networkConfig.destinationRouter
@@ -56,9 +60,9 @@ contract TestDestinationMinter is Test {
         string memory baseURI = "new uri";
 
         vm.prank(owner);
-        destinationMinter.setBaseUri(baseURI);
+        destinationMinter.setBaseURI(baseURI);
 
-        assertEq(nfts.getBaseUri(), baseURI);
+        assertEq(nfts.getBaseURI(), baseURI);
     }
 
     function test__EmitEvent__SetBaseUri() public {
@@ -66,10 +70,10 @@ contract TestDestinationMinter is Test {
         address owner = destinationMinter.owner();
 
         vm.expectEmit(true, true, true, true);
-        emit BaseUriSet(baseURI);
+        emit BaseURIUpdated(baseURI);
 
         vm.prank(owner);
-        destinationMinter.setBaseUri(baseURI);
+        destinationMinter.setBaseURI(baseURI);
     }
 
     function test__RevertWhen__NotOwnerSetsBaseUri() public {
@@ -82,7 +86,42 @@ contract TestDestinationMinter is Test {
         );
 
         vm.prank(USER);
-        destinationMinter.setBaseUri(baseURI);
+        destinationMinter.setBaseURI(baseURI);
+    }
+
+    /** SET CONTRACT  URI */
+    function test__SetContractUri() public {
+        address owner = destinationMinter.owner();
+        string memory newContractURI = "new uri";
+
+        vm.prank(owner);
+        destinationMinter.setContractURI(newContractURI);
+
+        assertEq(nfts.contractURI(), newContractURI);
+    }
+
+    function test__EmitEvent__SetContractUri() public {
+        string memory newContractURI = "new uri";
+        address owner = destinationMinter.owner();
+
+        vm.expectEmit(true, true, true, true);
+        emit ContractURIUpdated(newContractURI);
+
+        vm.prank(owner);
+        destinationMinter.setContractURI(newContractURI);
+    }
+
+    function test__RevertWhen__NotOwnerSetsContractUri() public {
+        string memory newContractURI = "new uri";
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                USER
+            )
+        );
+
+        vm.prank(USER);
+        destinationMinter.setContractURI(newContractURI);
     }
 
     /** SET MAX PER WALLET */

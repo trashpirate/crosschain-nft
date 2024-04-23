@@ -16,6 +16,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         string name;
         string symbol;
         string baseURI;
+        string contractURI;
         uint256 maxPerWallet;
         uint256 batchLimit;
         uint256 maxSupply;
@@ -26,6 +27,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
      */
     uint256 private immutable i_maxSupply;
 
+    string private s_contractURI;
     string private s_baseTokenURI;
     uint256 private s_maxPerWallet;
     uint256 private s_batchLimit;
@@ -39,7 +41,8 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
 
     event MaxPerWalletSet(address indexed sender, uint256 maxPerWallet);
     event BatchLimitSet(address indexed sender, uint256 batchLimit);
-    event BaseUriSet(string indexed baseUri);
+    event BaseURIUpdated(string indexed baseUri);
+    event ContractURIUpdated(string indexed contractUri);
     event MetadataUpdate(uint256 indexed tokenId);
 
     /**
@@ -77,6 +80,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
         s_ids = new uint256[](args.maxSupply);
 
         _setBaseURI(args.baseURI);
+        _setContractURI(args.contractURI);
     }
 
     /// @notice Mints NFT for a eth and a token fee
@@ -102,8 +106,14 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     }
 
     /// @notice Sets base Uri
+    /// @param _contractURI Maximum number of nfts that can be held by one account
+    function setContractURI(string memory _contractURI) external onlyOwner {
+        _setContractURI(_contractURI);
+    }
+
+    /// @notice Sets base Uri
     /// @param baseURI Maximum number of nfts that can be held by one account
-    function setBaseUri(string memory baseURI) external onlyOwner {
+    function setBaseURI(string memory baseURI) external onlyOwner {
         _setBaseURI(baseURI);
     }
 
@@ -151,13 +161,18 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     }
 
     /// @notice Gets base uri
-    function getBaseUri() external view returns (string memory) {
+    function getBaseURI() external view returns (string memory) {
         return _baseURI();
     }
 
     /**
      * Public Functions
      */
+
+    /// @notice retrieves contractURI
+    function contractURI() public view returns (string memory) {
+        return s_contractURI;
+    }
 
     /// @notice retrieves tokenURI
     /// @dev adapted from openzeppelin ERC721URIStorage contract
@@ -204,10 +219,17 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     }
 
     /// @notice Sets base uri
+    /// @param _contractURI contract uri for contract metadata
+    function _setContractURI(string memory _contractURI) private {
+        s_contractURI = _contractURI;
+        emit ContractURIUpdated(_contractURI);
+    }
+
+    /// @notice Sets base uri
     /// @param baseURI base uri for NFT metadata
     function _setBaseURI(string memory baseURI) private {
         s_baseTokenURI = baseURI;
-        emit BaseUriSet(baseURI);
+        emit BaseURIUpdated(baseURI);
     }
 
     /// @notice returns total supply

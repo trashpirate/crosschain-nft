@@ -6,11 +6,11 @@ import {Test, console} from "forge-std/Test.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-
 import {SourceMinter} from "./../../src/SourceMinter.sol";
 import {DeploySourceMinter} from "./../../script/deployment/DeploySourceMinter.s.sol";
 import {ERC20Token} from "./../../src/ERC20Token.sol";
 import {HelperConfig} from "../../script/helpers/HelperConfig.s.sol";
+import {MockCCIPRouter} from "../mocks/MockCCIPRouter.sol";
 
 contract TestSourceMinter is Test {
     // configuration
@@ -30,6 +30,8 @@ contract TestSourceMinter is Test {
     uint256 constant STARTING_BALANCE = 100_000_000 * 10 ** 18;
     uint256 constant NEW_TOKEN_FEE = 20_000 * 10 ** 18;
     uint256 constant NEW_ETH_FEE = 0.001 ether;
+
+    uint256 constant CCIP_FEE = 0.00001 ether;
 
     // events
     event SourceMinter_MessageSent(bytes32 messageId);
@@ -67,7 +69,6 @@ contract TestSourceMinter is Test {
     function setUp() external virtual {
         deployment = new DeploySourceMinter();
         (sourceMinter, helperConfig) = deployment.run();
-        deal(address(sourceMinter), 1 ether);
 
         networkConfig = helperConfig.getActiveNetworkConfigStruct();
 
@@ -144,6 +145,7 @@ contract TestSourceMinter is Test {
 
     /** WITHDRAW ETH */
     function test__WithdrawETH() public funded(USER) {
+        deal(address(sourceMinter), 1 ether);
         uint256 contractBalance = address(sourceMinter).balance;
         assertGt(contractBalance, 0);
 
@@ -159,6 +161,7 @@ contract TestSourceMinter is Test {
     }
 
     function test__RevertWhen__NotOwnerWithdrawsETH() public funded(USER) {
+        deal(address(sourceMinter), 1 ether);
         address owner = sourceMinter.owner();
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -328,7 +331,7 @@ contract TestSourceMinter is Test {
         uint256 ethBalance = USER.balance;
 
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
+        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
 
         vm.startPrank(USER);
         token.approve(address(sourceMinter), tokenFee);
@@ -342,7 +345,7 @@ contract TestSourceMinter is Test {
     }
 
     function test__EmitEvent__Mint() public funded(USER) unpaused {
-        uint256 ethFee = sourceMinter.getEthFee();
+        uint256 ethFee = sourceMinter.getEthFee() + CCIP_FEE;
         uint256 tokenFee = sourceMinter.getTokenFee();
 
         vm.prank(USER);
@@ -356,7 +359,7 @@ contract TestSourceMinter is Test {
     }
 
     function test__RevertWhen__Paused() public funded(USER) {
-        uint256 ethFee = sourceMinter.getEthFee();
+        uint256 ethFee = sourceMinter.getEthFee() + CCIP_FEE;
         uint256 tokenFee = sourceMinter.getTokenFee();
 
         vm.prank(USER);
@@ -379,7 +382,7 @@ contract TestSourceMinter is Test {
         vm.stopPrank();
 
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
+        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
 
         vm.prank(USER);
         token.approve(address(sourceMinter), tokenFee);
@@ -397,7 +400,7 @@ contract TestSourceMinter is Test {
         quantity = bound(quantity, 1, networkConfig.nftArgs.maxSupply);
 
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
+        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
         uint256 insufficientFee = ethFee - 0.01 ether;
 
         vm.prank(USER);
@@ -418,7 +421,7 @@ contract TestSourceMinter is Test {
         uint256 quantity
     ) public funded(USER) unpaused skipFork {
         quantity = bound(quantity, 1, networkConfig.nftArgs.maxSupply);
-        uint256 ethFee = quantity * sourceMinter.getEthFee();
+        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
         uint256 tokenFee = quantity * sourceMinter.getTokenFee();
 
         vm.prank(USER);

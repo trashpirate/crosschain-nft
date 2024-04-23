@@ -6,7 +6,7 @@ import {ERC20Token} from "../../src/ERC20Token.sol";
 import {RandomizedNFT} from "./../../src/RandomizedNFT.sol";
 import {SourceMinter} from "./../../src/SourceMinter.sol";
 import {DestinationMinter} from "./../../src/DestinationMinter.sol";
-import {MockCCIPRouter} from "@ccip/contracts/src/v0.8/ccip/test/mocks/MockRouter.sol";
+import {MockCCIPRouter} from "../../test/mocks/MockCCIPRouter.sol";
 
 contract HelperConfig is Script {
     /** NFT CONFIG - UDPATE BEFORE DEPLOYMENT !!! */
@@ -19,9 +19,12 @@ contract HelperConfig is Script {
     string public constant BASE_URI =
         "ipfs://QmX9WMzYYvLj8LuhAWwTEebWjERB5N56Av91wtJGvJ1aim/";
 
+    string public constant CONTRACT_URI =
+        "ipfs://QmX9WMzYYvLj8LuhAWwTEebWjERB5N56Av91wtJGvJ1aim/";
+
     /** MAINNET - UDPATE BEFORE DEPLOYMENT !!! */
-    string public constant NAME = "Queens";
-    string public constant SYMBOL = "QUEEN";
+    string public constant NAME = "Randomized NFT";
+    string public constant SYMBOL = "RANDNFT";
     address public constant FEE_ADDRESS_MAIN =
         0x7Bb8be3D9015682d7AC0Ea377dC0c92B0ba152eF;
     address public constant TOKEN_ADDRESS_MAIN =
@@ -90,6 +93,7 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
+                    contractURI: CONTRACT_URI,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
@@ -114,6 +118,7 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
+                    contractURI: CONTRACT_URI,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
@@ -138,6 +143,7 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
+                    contractURI: CONTRACT_URI,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
@@ -169,6 +175,7 @@ contract HelperConfig is Script {
                     name: NAME,
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
+                    contractURI: CONTRACT_URI,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
