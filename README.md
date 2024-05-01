@@ -76,6 +76,20 @@ https://base-sepolia.blockscout.com/address/0xCD8946Dda83af26E817579A40587efeC05
 NFT Contract:
 https://base-sepolia.blockscout.com/address/0x1d4880a45e8D1B7627728b31B2D5c23Dd9DbE46b
 
+
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+Don't forget to give the project a star! Thanks again!
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
 ## Author
 
 👤 **Nadina Oates**
