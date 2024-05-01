@@ -50,15 +50,15 @@ $ forge test
 
 **Testnet Payment Token**  
 ```bash
-$ make deploy-token-testnet"
+$ make deploy-token-testnet
 ```
 **Testnet Source Minter**  
 ```bash
-$ make deploy-source-testnet"
+$ make deploy-source-testnet
 ```
 **Testnet Destination Minter and NFT Contract**  
 ```bash
-$ make deploy-destination-testnet"
+$ make deploy-destination-testnet
 ```
 
 ## Deployments
