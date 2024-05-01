@@ -47,7 +47,7 @@ $ forge test
 ```
 
 ### Deploy contract
-Set up your Testnet and Mainnet accounts with keystore ```cast wallet import --interactive``` and edit the Makefile accordingly.
+Set up your Testnet and Mainnet accounts with keystore using ```cast wallet import --interactive``` and edit the Makefile accordingly.
 
 **Testnet Payment Token**  
 ```bash
