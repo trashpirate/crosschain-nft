@@ -1,4 +1,69 @@
-# testnet
+# CROSS-CHAIN NFT
+
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg?style=for-the-badge)
+![Forge](https://img.shields.io/badge/forge-v0.2.0-blue.svg?style=for-the-badge)
+![Solc](https://img.shields.io/badge/solc-v0.8.20-blue.svg?style=for-the-badge)
+[![License: MIT](https://img.shields.io/github/license/trashpirate/hold-earn.svg?style=for-the-badge)](https://github.com/trashpirate/hold-earn/blob/main/LICENSE)
+
+[![Website: nadinaoates.com](https://img.shields.io/badge/Portfolio-00e0a7?style=for-the-badge&logo=Website)](https://nadinaoates.com)
+[![LinkedIn: nadinaoates](https://img.shields.io/badge/LinkedIn-0a66c2?style=for-the-badge&logo=LinkedIn&logoColor=f5f5f5)](https://linkedin.com/in/nadinaoates)
+[![Twitter: N0_crypto](https://img.shields.io/badge/@N0_crypto-black?style=for-the-badge&logo=X)](https://twitter.com/N0_crypto)
+
+
+## About
+This repo includes a pseudo-randomized cross-chain NFT contract (ERC721A) using Chainlink CCIP. The contracts are deployed on BNB Testnet and Base Sepolia.
+
+## Installation
+
+### Install dependencies
+```bash
+$ make install
+```
+
+## Usage
+Before running any commands, create a .env file and add the following environment variables. These are configured for BNB and BASE chain:
+```bash
+
+# network configs
+RPC_LOCALHOST="http://127.0.0.1:8545"
+
+# binance smart chain
+RPC_BSC_MAIN=<rpc url>
+RPC_BSC_TEST=<rpc url>
+BSCSCAN_KEY=<api key>
+
+# base chain
+RPC_BASE_MAIN=<rpc url>
+RPC_BASE_SEPOLIA=<rpc url>
+
+BASESCAN_KEY=<api key>
+BASESCAN_SEPOLIA_KEY=<api key>
+
+```
+
+### Run tests
+```bash
+$ forge test
+```
+
+### Deploy contract
+
+**Testnet Payment Token**  
+```bash
+$ make deploy-token-testnet"
+```
+**Testnet Source Minter**  
+```bash
+$ make deploy-source-testnet"
+```
+**Testnet Destination Minter and NFT Contract**  
+```bash
+$ make deploy-destination-testnet"
+```
+
+## Deployments
+
+### Testnet
 Payment Token:
 https://testnet.bscscan.com/address/0x563f5a7fa101dd7051853604ec63103ab6226c7b
 
@@ -11,14 +76,21 @@ https://base-sepolia.blockscout.com/address/0xCD8946Dda83af26E817579A40587efeC05
 NFT Contract:
 https://base-sepolia.blockscout.com/address/0x1d4880a45e8D1B7627728b31B2D5c23Dd9DbE46b
 
+## Author
 
-# test on mainnet
+👤 **Nadina Oates**
 
-Source Minter:
-https://bscscan.com/address/0x563f5a7fa101dd7051853604ec63103ab6226c7b#writeContract
+* Website: [nadinaoates.com](https://nadinaoates.com)
+* Twitter: [@N0\_crypto](https://twitter.com/N0\_crypto)
+* Github: [@trashpirate](https://github.com/trashpirate)
+* LinkedIn: [@nadinaoates](https://linkedin.com/in/nadinaoates)
 
-Destination Minter:
-https://base.blockscout.com/address/0x563F5a7fa101dD7051853604ec63103Ab6226c7b?tab=write_contract
 
-NFT Contract:
-https://base.blockscout.com/address/0x8b275F195Eaa5eE618b5b36Ea23630Be31085CFc?tab=read_contract
+## 📝 License
+
+Copyright © 2024 [Nadina Oates](https://github.com/trashpirate).
+
+This project is [MIT](https://github.com/trashpirate/crosschain-nft/blob/master/LICENSE) licensed.
+
+
+

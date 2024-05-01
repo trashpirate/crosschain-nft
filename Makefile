@@ -26,7 +26,7 @@ test :; forge test
 
 # test coverage
 coverage:; @forge coverage --contracts src
-coverage-w:; @forge coverage --contracts src --report debug > coverage.txt
+coverage-report:; @forge coverage --contracts src --report debug > coverage.txt
 
 # take snapshot
 snapshot :; forge snapshot
