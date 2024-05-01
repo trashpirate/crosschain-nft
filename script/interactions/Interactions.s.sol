@@ -14,7 +14,11 @@ contract MintNft is Script {
         address recentReceiverAddress
     ) public {
         uint256 ethFee = SourceMinter(payable(recentContractAddress))
-            .getEthFee() + CCIP_FEE;
+            .getEthFee() +
+            SourceMinter(payable(recentContractAddress)).getCCIPFee(
+                recentReceiverAddress,
+                1
+            );
         vm.startBroadcast();
 
         uint256 gasLeft = gasleft();
@@ -34,7 +38,7 @@ contract MintNft is Script {
         );
         address recentReceiverAddress = DevOpsTools.get_most_recent_deployment(
             "DestinationMinter",
-            block.chainid
+            84532
         );
         mintNft(recentContractAddress, recentReceiverAddress);
     }
@@ -113,5 +117,23 @@ contract ApproveNft is Script {
             block.chainid
         );
         approveNft(recentContractAddress);
+    }
+}
+
+contract BurnNft is Script {
+    address public SENDER = makeAddr("sender");
+
+    function burnNft(address recentContractAddress) public {
+        vm.startBroadcast();
+        RandomizedNFT(payable(recentContractAddress)).burn(0);
+        vm.stopBroadcast();
+    }
+
+    function run() external {
+        address recentContractAddress = DevOpsTools.get_most_recent_deployment(
+            "RandomizedNFT",
+            block.chainid
+        );
+        burnNft(recentContractAddress);
     }
 }

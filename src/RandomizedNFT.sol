@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC721A, IERC721A} from "@erc721a/contracts/ERC721A.sol";
@@ -10,13 +10,14 @@ import {ERC721ABurnable} from "@erc721a/contracts/extensions/ERC721ABurnable.sol
 /// @title RandomizedNFT
 /// @author Nadina Oates
 /// @notice Contract implementing ERC721A standard using the ERC20 and native token for minting
-contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
+contract RandomizedNFT is ERC721A, ERC721ABurnable, ERC2981, Ownable {
     /** Types */
     struct ConstructorArguments {
         string name;
         string symbol;
         string baseURI;
         string contractURI;
+        uint96 royaltyNumerator;
         uint256 maxPerWallet;
         uint256 batchLimit;
         uint256 maxSupply;
@@ -43,7 +44,11 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     event BatchLimitSet(address indexed sender, uint256 batchLimit);
     event BaseURIUpdated(string indexed baseUri);
     event ContractURIUpdated(string indexed contractUri);
-    event MetadataUpdate(uint256 indexed tokenId);
+    event RoyaltyUpdated(
+        address indexed feeAddress,
+        uint96 indexed royaltyNumerator
+    );
+    event MetadataUpdated(uint256 indexed tokenId);
 
     /**
      * Errors
@@ -81,6 +86,8 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
 
         _setBaseURI(args.baseURI);
         _setContractURI(args.contractURI);
+
+        _setDefaultRoyalty(msg.sender, args.royaltyNumerator);
     }
 
     /// @notice Mints NFT for a eth and a token fee
@@ -106,15 +113,26 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     }
 
     /// @notice Sets base Uri
-    /// @param _contractURI Maximum number of nfts that can be held by one account
+    /// @param _contractURI contract uri
     function setContractURI(string memory _contractURI) external onlyOwner {
         _setContractURI(_contractURI);
     }
 
     /// @notice Sets base Uri
-    /// @param baseURI Maximum number of nfts that can be held by one account
+    /// @param baseURI base uri
     function setBaseURI(string memory baseURI) external onlyOwner {
         _setBaseURI(baseURI);
+    }
+
+    /// @notice Sets royalty
+    /// @param feeAddress address receiving royalties
+    /// @param royaltyNumerator numerator to calculate fees (denominator is 10000)
+    function setRoyalty(
+        address feeAddress,
+        uint96 royaltyNumerator
+    ) external onlyOwner {
+        _setDefaultRoyalty(feeAddress, royaltyNumerator);
+        emit RoyaltyUpdated(feeAddress, royaltyNumerator);
     }
 
     /// @notice Sets the maximum number of nfts per wallet (only owner)
@@ -198,8 +216,10 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     /// @param interfaceId interfaceId to be checked
     function supportsInterface(
         bytes4 interfaceId
-    ) public view override(ERC721A, IERC721A) returns (bool) {
-        return super.supportsInterface(interfaceId);
+    ) public view override(ERC721A, IERC721A, ERC2981) returns (bool) {
+        return
+            ERC721A.supportsInterface(interfaceId) ||
+            ERC2981.supportsInterface(interfaceId);
     }
 
     /**
@@ -241,7 +261,7 @@ contract RandomizedNFT is ERC721A, ERC721ABurnable, Ownable {
     /// @dev adapted code from openzeppelin ERC721URIStorage
     function _setTokenURI(uint256 tokenId) private {
         s_tokenURIs[tokenId] = _randomTokenURI();
-        emit MetadataUpdate(tokenId);
+        emit MetadataUpdated(tokenId);
     }
 
     /// @notice generates a random tokenURI

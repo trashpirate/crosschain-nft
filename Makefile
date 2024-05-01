@@ -48,11 +48,20 @@ deploy-destination-local:
 	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url localhost --private-key ${DEFAULT_ANVIL_KEY} --broadcast
 
 deploy-token-testnet: 
-	@forge script script/deployment/DeployERC20Token.s.sol:DeployERC20Token --rpc-url $(RPC_BSC_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
+	@forge script script/deployment/DeployERC20Token.s.sol:DeployERC20Token --rpc-url $(RPC_BSC_TEST) --account Test-Deployer --sender 0x11f392ba82c7d63bfdb313ca63372f6de21ab448 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
 deploy-source-testnet: 
-	@forge script script/deployment/DeploySourceMinter.s.sol:DeploySourceMinter --rpc-url $(RPC_BSC_TEST) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
+	@forge script script/deployment/DeploySourceMinter.s.sol:DeploySourceMinter --rpc-url $(RPC_BSC_TEST) --account Test-Deployer --sender 0x11f392ba82c7d63bfdb313ca63372f6de21ab448 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
 deploy-destination-testnet: 
-	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url $(RPC_BASE_SEPOLIA) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BASESCAN_SEPOLIA_KEY) -vvvv
+	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url $(RPC_BASE_SEPOLIA) --account Test-Deployer --sender 0x11f392ba82c7d63bfdb313ca63372f6de21ab448 --broadcast --verify --etherscan-api-key $(BASESCAN_SEPOLIA_KEY) -vvvv
+
+deploy-source-mainnet: 
+	@forge script script/deployment/DeploySourceMinter.s.sol:DeploySourceMinter --rpc-url $(RPC_BSC_MAIN) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BSCSCAN_KEY)
+deploy-destination-mainnet: 
+	@forge script script/deployment/DeployDestinationMinter.s.sol:DeployDestinationMinter --rpc-url $(RPC_BASE_MAIN) --account Queens-Deployer --sender 0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0 --broadcast --verify --etherscan-api-key $(BASESCAN_KEY) -vvvv
+
+mint-testnet:
+	@forge script script/interactions/Interactions.s.sol:MintNft --rpc-url $(RPC_BSC_TEST) --account Test-Deployer --sender 0x11f392ba82c7d63bfdb313ca63372f6de21ab448 --broadcast
+
 
 # security
 slither :; slither ./src 

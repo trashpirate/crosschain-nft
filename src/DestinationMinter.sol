@@ -31,16 +31,26 @@ contract DestinationMinter is CCIPReceiver, Ownable {
         nft = new RandomizedNFT(args);
     }
 
-    /// @notice Sets new base uri
+    /// @notice Sets new contract uri
     /// @param contractURI base uri for metadata
     function setContractURI(string memory contractURI) external onlyOwner {
         nft.setContractURI(contractURI);
     }
-    
+
     /// @notice Sets new base uri
     /// @param baseURI base uri for metadata
     function setBaseURI(string memory baseURI) external onlyOwner {
         nft.setBaseURI(baseURI);
+    }
+
+    /// @notice Sets royalty
+    /// @param feeAddress address receiving royalties
+    /// @param numerator numerator to calculate fees (denominator is 10000)
+    function setRoyalty(
+        address feeAddress,
+        uint96 numerator
+    ) external onlyOwner {
+        nft.setRoyalty(feeAddress, numerator);
     }
 
     /// @notice Sets the maximum number of nfts per wallet in NFT contract

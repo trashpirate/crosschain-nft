@@ -12,7 +12,7 @@ import {ERC20Token} from "../../src/ERC20Token.sol";
 
 import {HelperConfig} from "../../script/helpers/HelperConfig.s.sol";
 import {DeployCrossChainNFT} from "./../../script/deployment/DeployCrossChainNFT.s.sol";
-import {MintNft, BatchMint, TransferNft, ApproveNft} from "./../../script/interactions/Interactions.s.sol";
+import {MintNft, BatchMint, TransferNft, ApproveNft, BurnNft} from "./../../script/interactions/Interactions.s.sol";
 
 contract TestInteractions is Test {
     // configuration
@@ -113,6 +113,7 @@ contract TestInteractions is Test {
         assertEq(randomizedNFT.balanceOf(msg.sender), 0);
     }
 
+    /** APPROVE */
     function test__ApproveNft() public fundedAndApproved(msg.sender) unpaused {
         MintNft mintNft = new MintNft();
         mintNft.mintNft(address(sourceMinter), address(destinationMinter));
@@ -122,5 +123,17 @@ contract TestInteractions is Test {
         approveNft.approveNft(address(randomizedNFT));
 
         assertEq(randomizedNFT.getApproved(0), approveNft.SENDER());
+    }
+
+    /** BURN */
+    function test__BurnNft() public fundedAndApproved(msg.sender) unpaused {
+        MintNft mintNft = new MintNft();
+        mintNft.mintNft(address(sourceMinter), address(destinationMinter));
+        assertEq(randomizedNFT.balanceOf(msg.sender), 1);
+
+        BurnNft burnNft = new BurnNft();
+        burnNft.burnNft(address(randomizedNFT));
+
+        assertEq(randomizedNFT.balanceOf(msg.sender), 0);
     }
 }

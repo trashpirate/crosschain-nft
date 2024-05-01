@@ -17,16 +17,18 @@ contract HelperConfig is Script {
     uint256 public constant BATCH_LIMIT = 1;
 
     string public constant BASE_URI =
-        "ipfs://QmX9WMzYYvLj8LuhAWwTEebWjERB5N56Av91wtJGvJ1aim/";
+        "ipfs://bafybeifmubmzo44kp7txputm72okodpyihencmlzstgyweyqpi7rn7eyzu/";
 
     string public constant CONTRACT_URI =
-        "ipfs://QmX9WMzYYvLj8LuhAWwTEebWjERB5N56Av91wtJGvJ1aim/";
+        "ipfs://bafybeifsfbuyz2fesqc47tq5bxu5pksojaq3zdkeucljwemdbtm56nks6i/contractMetadata";
+
+    uint96 public constant ROYALTY_NUMERATOR = 500;
 
     /** MAINNET - UDPATE BEFORE DEPLOYMENT !!! */
     string public constant NAME = "Randomized NFT";
     string public constant SYMBOL = "RANDNFT";
     address public constant FEE_ADDRESS_MAIN =
-        0x7Bb8be3D9015682d7AC0Ea377dC0c92B0ba152eF;
+        0xe4a930c9E0B409572AC1728a6dCa3f4af775b5e0;
     address public constant TOKEN_ADDRESS_MAIN =
         0x45e26B10Ae6f95d9d5133720937693E17171F7F9;
 
@@ -94,6 +96,7 @@ contract HelperConfig is Script {
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
                     contractURI: CONTRACT_URI,
+                    royaltyNumerator: ROYALTY_NUMERATOR,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
@@ -119,6 +122,7 @@ contract HelperConfig is Script {
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
                     contractURI: CONTRACT_URI,
+                    royaltyNumerator: ROYALTY_NUMERATOR,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
@@ -144,6 +148,7 @@ contract HelperConfig is Script {
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
                     contractURI: CONTRACT_URI,
+                    royaltyNumerator: ROYALTY_NUMERATOR,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY
@@ -176,6 +181,7 @@ contract HelperConfig is Script {
                     symbol: SYMBOL,
                     baseURI: BASE_URI,
                     contractURI: CONTRACT_URI,
+                    royaltyNumerator: ROYALTY_NUMERATOR,
                     maxPerWallet: MAX_PER_WALLET,
                     batchLimit: BATCH_LIMIT,
                     maxSupply: MAX_SUPPLY

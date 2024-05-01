@@ -32,7 +32,7 @@ contract TestCrossChainMint is Test {
     uint256 constant CCIP_FEE = 0.00001 ether;
 
     // events
-    event MetadataUpdate(uint256 indexed tokenId);
+    event MetadataUpdated(uint256 indexed tokenId);
 
     // modifiers
     modifier skipFork() {
@@ -83,11 +83,18 @@ contract TestCrossChainMint is Test {
         token = ERC20Token(sourceMinter.getPaymentToken());
     }
 
+    function test__CCIPFee() public view {
+        uint256 ccipFee = sourceMinter.getCCIPFee(USER, 1);
+        assertEq(ccipFee, CCIP_FEE);
+    }
+
     function test__CrossChainMint(
         uint quantity
     ) public fundedAndApproved(USER) unpaused noBatchLimit skipFork {
         quantity = bound(quantity, 1, 2);
-        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
+        uint256 ethFee = quantity *
+            sourceMinter.getEthFee() +
+            sourceMinter.getCCIPFee(USER, 1);
 
         vm.prank(USER);
         sourceMinter.mint{value: ethFee}(address(destinationMinter), quantity);
@@ -100,10 +107,11 @@ contract TestCrossChainMint is Test {
         fundedAndApproved(USER)
         unpaused
     {
-        uint256 ethFee = sourceMinter.getEthFee() + CCIP_FEE;
+        uint256 ethFee = sourceMinter.getEthFee() +
+            sourceMinter.getCCIPFee(USER, 1);
 
         vm.expectEmit(true, true, true, true);
-        emit MetadataUpdate(0);
+        emit MetadataUpdated(0);
 
         vm.prank(USER);
         sourceMinter.mint{value: ethFee}(address(destinationMinter), 1);
@@ -114,7 +122,8 @@ contract TestCrossChainMint is Test {
         fundedAndApproved(USER)
         unpaused
     {
-        uint256 ethFee = sourceMinter.getEthFee() + CCIP_FEE;
+        uint256 ethFee = sourceMinter.getEthFee() +
+            sourceMinter.getCCIPFee(USER, 1);
 
         vm.expectRevert();
         // RandomizedNFT.RandomizedNFT_InsufficientMintQuantity.selector
@@ -128,7 +137,9 @@ contract TestCrossChainMint is Test {
         unpaused
     {
         uint quantity = 1;
-        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
+        uint256 ethFee = quantity *
+            sourceMinter.getEthFee() +
+            sourceMinter.getCCIPFee(USER, 1);
 
         vm.startPrank(USER);
         for (uint256 index = 0; index < randomizedNFT.getMaxSupply(); index++) {
@@ -149,7 +160,9 @@ contract TestCrossChainMint is Test {
         unpaused
     {
         uint quantity = 3;
-        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
+        uint256 ethFee = quantity *
+            sourceMinter.getEthFee() +
+            sourceMinter.getCCIPFee(USER, 1);
 
         vm.startPrank(destinationMinter.owner());
         destinationMinter.setBatchLimit(2);
@@ -166,7 +179,9 @@ contract TestCrossChainMint is Test {
         unpaused
     {
         uint256 quantity = 1;
-        uint256 ethFee = quantity * sourceMinter.getEthFee() + CCIP_FEE;
+        uint256 ethFee = quantity *
+            sourceMinter.getEthFee() +
+            sourceMinter.getCCIPFee(USER, 1);
 
         Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
             receiver: abi.encode(address(destinationMinter)),

@@ -43,7 +43,7 @@ contract TestInteractions is Test {
     uint256 constant CCIP_FEE = 0.00001 ether;
 
     // events
-    event MetadataUpdate(uint256 indexed tokenId);
+    event MetadataUpdated(uint256 indexed tokenId);
 
     // modifiers
     modifier skipFork() {
@@ -95,7 +95,7 @@ contract TestInteractions is Test {
     }
 
     /** INITIALIZATION */
-    function test__RandomizedNFTInitialization() public {
+    function test__RandomizedNFTInitialization() public view {
         assertEq(randomizedNFT.name(), "Randomized NFT");
         assertEq(randomizedNFT.symbol(), "RANDNFT");
         assertEq(randomizedNFT.getMaxSupply(), networkConfig.nftArgs.maxSupply);
@@ -112,7 +112,8 @@ contract TestInteractions is Test {
             networkConfig.nftArgs.contractURI
         );
         assertEq(randomizedNFT.getBaseURI(), networkConfig.nftArgs.baseURI);
-        assertEq(randomizedNFT.supportsInterface(0x80ac58cd), true);
+        assertEq(randomizedNFT.supportsInterface(0x80ac58cd), true); // ERC721
+        assertEq(randomizedNFT.supportsInterface(0x2a55205a), true); // ERC2981
     }
 
     /** TRANSFER */
